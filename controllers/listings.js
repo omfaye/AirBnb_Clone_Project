@@ -91,7 +91,24 @@ module.exports.createRoute = async (req,res)=>{
 
 };
 
-module.exports.searchRoute = async(req,res)=>{
-    
-    console.log(req.body);
-}
+// listingController.js
+
+module.exports.searchRoute = async (req, res) => {
+    try {
+        const searchQuery = req.query.q;
+
+        // Modify the Mongoose query to filter listings based on the location or country
+        const listings = await Listing.find({
+            $or: [
+                { location: { $regex: new RegExp(searchQuery, 'i') } },
+                { country: { $regex: new RegExp(searchQuery, 'i') } }
+            ]
+        });
+
+        // Render the search.ejs template with the filtered listings
+        res.render("listings/search.ejs", { listings, searchQuery });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+};
